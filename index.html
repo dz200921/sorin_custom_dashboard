@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sorin Product Dashboard v3</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#F4F6FA; --card:#FFFFFF; --border:#E2E8F0; --primary:#2F5496; --primary-light:#4472C4;
+      --accent:#10B981; --danger:#EF4444; --warning:#F59E0B; --text:#1E293B; --text-secondary:#64748B;
+      --text-muted:#94A3B8; --shadow:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); --radius:12px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text)}
+    .header{background:#fff;border-bottom:1px solid var(--border);padding:20px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+    .header h1{font-size:20px;color:var(--primary)}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#DCFCE7;color:#166534}
+    .header-meta{display:flex;gap:20px;align-items:center;color:var(--text-secondary);font-size:13px}
+    .container{max-width:1400px;margin:0 auto;padding:24px 32px}
+    .section{margin-bottom:28px}
+    .section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .section-divider{width:4px;height:20px;border-radius:2px;background:var(--primary)}
+    .section-header h2{font-size:15px;text-transform:uppercase;letter-spacing:.5px;color:var(--primary)}
+    .section-desc{color:var(--text-muted);font-style:italic}
+    .grid-4,.grid-3,.grid-2{display:grid;gap:16px}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+    .kpi{text-align:center;position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:center}
+    .kpi-flag{position:absolute;right:12px;top:12px;width:10px;height:10px;border-radius:50%}
+    .green{background:var(--accent)} .yellow{background:var(--warning)} .red{background:var(--danger)} .grey{background:#CBD5E1}
+    .kpi-label{font-size:12px;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px}
+    .kpi-value{font-size:28px;font-weight:800;color:var(--text)}
+    .kpi-sub{font-size:12px;color:var(--text-muted);margin-top:6px}
+    .empty{color:#CBD5E1}
+    .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px}
+    .pill-up{background:#DCFCE7;color:#166534}
+    .pill-neutral{background:#F1F5F9;color:#64748B}
+    .pill-green{background:#DCFCE7;color:#166534}
+    .pill-red{background:#FEE2E2;color:#991B1B}
+    .chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+    .chart-subtitle{font-size:11px;color:var(--text-muted);margin-bottom:12px}
+    .chart-container{position:relative;width:100%}
+    .chart-container canvas{width:100% !important}
+    .insight{background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid var(--primary);border-radius:0 8px 8px 0;padding:12px 16px;margin-top:12px}
+    .insight-title{font-size:11px;color:var(--primary);font-weight:700;text-transform:uppercase;margin-bottom:4px}
+    .insight-text{font-size:12px;color:var(--text-secondary);line-height:1.5}
+    /* 修正漏斗图样式 */
+    .funnel{display:flex;flex-direction:column;gap:8px}
+    .funnel-row{display:flex;align-items:center;gap:12px;width:100%}
+    .funnel-label{width:110px;text-align:right;color:var(--text-secondary);font-weight:600;font-size:12px}
+    .funnel-bar-bg{flex:1;height:34px;background:#F1F5F9;border-radius:6px;overflow:hidden}
+    .funnel-bar-fill{height:100%;display:flex;align-items:center;padding-left:12px;color:#fff;font-weight:700;border-radius:6px;white-space:nowrap}
+    .funnel-views{background:#4472C4}
+    .funnel-signups{background:#10B981}
+    .funnel-registered{background:#F59E0B}
+    .funnel-val{width:84px;text-align:right;font-weight:700}
+    .mini-table{width:100%;border-collapse:collapse;font-size:12px}
+    .mini-table th{padding:8px;text-align:left;color:var(--text-secondary);border-bottom:2px solid var(--border);text-transform:uppercase;font-size:11px}
+    .mini-table td{padding:10px 8px;border-bottom:1px solid var(--border)}
+    .mini-table tr:last-child td{border-bottom:none}
+    .muted{color:var(--text-muted)}
+    .note{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px}
+    @media(max-width:1024px){.grid-4{grid-template-columns:repeat(2,1fr)} .grid-3,.grid-2{grid-template-columns:1fr}}
+    @media(max-width:640px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr} .container{padding:16px}}
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>Sorin Product Dashboard</h1>
+  <div class="header-meta">
+    <span id="weekLabelTop"></span>
+    <span class="badge">● v3</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Upper Funnel Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-divider"></div>
+      <h2>Upper Funnel</h2>
+      <span class="section-desc">— Are we filling the top of the pipe?</span>
+    </div>
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">New Signups (This Week)</div>
+        <div class="kpi-value" id="overviewNewSignups"></div>
+        <div class="kpi-sub" id="overviewNewSignupsDelta"></div>
+        <div class="pill pill-neutral" id="uf-signups-pill"></div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Download → Register Rate</div>
+        <div class="kpi-value" id="overviewRegisterRate"></div>
+        <div class="kpi-sub">Total registered users / total user views</div>
+        <div class="pill pill-neutral">Cumulative</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag grey"></div>
+        <div class="kpi-label">Blended CPA</div>
+        <div class="kpi-value empty" id="uf-cpa">—</div>
+        <div class="kpi-sub">Leave blank until paid spend source is stable</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag grey"></div>
+        <div class="kpi-label">Onboarding Completion</div>
+        <div class="kpi-value empty" id="uf-onboarding">—</div>
+        <div class="kpi-sub">Leave blank until onboarding-step source is stable</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="chart-title">Acquisition Funnel</div>
+        <div class="chart-subtitle">Current week views → signups, plus cumulative registered users</div>
+        <div class="funnel" id="acquisitionFunnel"></div>
+        <div class="insight">
+          <div class="insight-title">Insight</div>
+          <div class="insight-text" id="acquisitionInsight"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Signups by Channel (Weekly Trend)</div>
+        <div class="chart-subtitle">Stacked by grouped channel buckets to match boss template</div>
+        <div class="chart-container" style="height:260px">
+          <canvas id="signupsByChannelChart"></canvas>
+        </div>
+        <div class="insight">
+          <div class="insight-title">Insight</div>
+          <div class="insight-text" id="channelInsight"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Retention Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-divider"></div>
+      <h2>Retention</h2>
+      <span class="section-desc">— Are users coming back?</span>
+    </div>
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="card kpi">
+        <div class="kpi-flag red"></div>
+        <div class="kpi-label">D1 Retention</div>
+        <div class="kpi-value" id="retentionD1">100.0%</div>
+        <div class="kpi-sub">Classic retention</div>
+        <div class="pill pill-green" id="retentionD1Delta">▲ 0.0pp</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag yellow"></div>
+        <div class="kpi-label">D7 Retention</div>
+        <div class="kpi-value" id="retentionD7">0.0%</div>
+        <div class="kpi-sub">Classic retention</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">D30 Retention</div>
+        <div class="kpi-value" id="retentionD30">0.0%</div>
+        <div class="kpi-sub">Classic retention</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Retention Health</div>
+        <div class="kpi-value" id="ret-health">5.65% / 4.55%</div>
+        <div class="kpi-sub">CURR / NURR</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="chart-title">Classic Retention</div>
+        <div class="chart-subtitle">Available warehouse points</div>
+        <div class="chart-container" style="height:250px">
+          <canvas id="retentionChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Retention Health</div>
+        <div class="chart-subtitle">Rolling current vs new user return rate</div>
+        <table class="mini-table">
+          <thead>
+            <tr><th>Metric</th><th>Definition</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CURR</td><td>Probability a current user returns this week</td><td id="curr">5.65%</td></tr>
+            <tr><td>NURR</td><td>Probability a new user returns this week</td><td id="nurr">4.55%</td></tr>
+            <tr><td>Current users</td><td>Engaged today and at least once in prior 6 days</td><td id="current-users">74</td></tr>
+            <tr><td>New users</td><td>First day of engagement ever</td><td id="new-users">492</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engagement Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-divider"></div>
+      <h2>Engagement</h2>
+      <span class="section-desc">— How deeply are users using the product?</span>
+    </div>
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">DAU</div>
+        <div class="kpi-value" id="engagementDAU"></div>
+        <div class="kpi-sub" id="engagementDAUSub"></div>
+        <div class="pill" id="engagementDAUDelta"></div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Stickiness</div>
+        <div class="kpi-value" id="engagementStickiness"></div>
+        <div class="kpi-sub">DAU / MAU</div>
+        <div class="pill" id="engagementStickinessDelta"></div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag yellow"></div>
+        <div class="kpi-label">Msgs / Session</div>
+        <div class="kpi-value" id="engagementMsgsPerSession"></div>
+        <div class="kpi-sub">messages_sent / sessions_created</div>
+        <div class="pill" id="engagementMsgsPerSessionDelta"></div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Messages / User</div>
+        <div class="kpi-value" id="engagementMsgsPerUser"></div>
+        <div class="kpi-sub">messages_sent / users_sending message</div>
+        <div class="pill" id="engagementMsgsPerUserDelta"></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="chart-title">DAU / WAU / MAU</div>
+        <div class="chart-subtitle">Available active-user scales (New vs Returning DAU)</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="dauTrendChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">User Message Volume Distribution</div>
+        <div class="chart-subtitle">Daily distribution of users by message count</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="userMsgDistChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Session Message Depth Distribution</div>
+        <div class="chart-subtitle">Daily distribution of sessions by message count</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="sessionDepthChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <div class="chart-title">Message Mix by Mode</div>
+        <div class="chart-subtitle">Auto / Fast / Research share of daily messages</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="modeMixChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Feature Adoption (Daily proxy, not weekly WAU matrix)</div>
+        <div class="chart-subtitle">Distinct daily feature users / WAU snapshot</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="featureAdoptionChart"></canvas>
+        </div>
+        <div class="insight">
+          <div class="insight-title">Note</div>
+          <div class="insight-text">This is a daily proxy because true weekly feature users / WAU is not currently available.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monetization Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-divider"></div>
+      <h2>Monetization</h2>
+      <span class="section-desc">— Is engagement converting to revenue?</span>
+    </div>
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">ARPU (Monthly)</div>
+        <div class="kpi-value" id="monthlyArpu">$0.03</div>
+        <div class="kpi-sub">Monthly revenue / MAU</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Monthly Revenue</div>
+        <div class="kpi-value" id="monthlyRevenue">$73</div>
+        <div class="kpi-sub">Warehouse monthly paid amount</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Total Subscribed Users</div>
+        <div class="kpi-value" id="totalSubscribedUsers">3</div>
+        <div class="kpi-sub">Cumulative subscribed users</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag yellow"></div>
+        <div class="kpi-label">Revenue / Paying User</div>
+        <div class="kpi-value" id="revenuePerPayingUser">$36.50</div>
+        <div class="kpi-sub">Monthly revenue / MSU</div>
+        <div class="kpi-sub">MSU: <span id="msuValue">2</span></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="chart-title">Revenue and Paying-user Revenue</div>
+        <div class="chart-subtitle">Daily / weekly / monthly (by user tier)</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="revenueTierChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Transactions</div>
+        <div class="chart-subtitle">Available confirmed rates and volumes</div>
+        <table class="mini-table" id="transactionsTable">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Initiated</th>
+              <th>Confirmed</th>
+              <th>Rate</th>
+              <th>Volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Swap</td>
+              <td>1</td>
+              <td>0</td>
+              <td>0.0%</td>
+              <td>$0.00</td>
+            </tr>
+            <tr>
+              <td>Transfer</td>
+              <td>0</td>
+              <td>0</td>
+              <td>0.0%</td>
+              <td>$0.00</td>
+            </tr>
+            <tr>
+              <td>Stake</td>
+              <td>0</td>
+              <td>0</td>
+              <td>0.0%</td>
+              <td>$0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./data.js"></script>
+<script src="./render.js"></script>
+</body>
+</html>
