@@ -1,76 +1,60 @@
 window.dashboardData = {
   meta: {
     title: "Sorin Product Dashboard",
-    currentWeekLabel: "Current week to date",
-    liveLabel: "Live"
+    lastUpdated: "2026-04-22",
+    dataStartDate: "2026-04-16"
   },
   upperFunnel: {
-    currentWeek: {
-      label: "2026-04-20~2026-04-21",
-      signups: 1267,
-      userViews: 3739
+    botFilter: {
+      tier1: "Referral users with exactly 5 messages + 0 feature events + 1 active day + 0 logins — catches scripted 'send 5 messages and leave' farms.",
+      tier2: "Referral users with \u22641 msgs + 0 features + 1 day + 0 logins, from 5 known ghost-farm referral codes (\u226580% ghost rate).",
+      convRateDefinition: "Clean signups \u00f7 new visitors (first-pageview users).",
+      source: "PostHog events (frontend only, undercounts mobile)."
     },
-    previousComparable: {
-      label: "2026-04-16~2026-04-19",
-      signups: 776
+    filterImpact: {
+      totalRaw: 2223,
+      removedTier1: 1063,
+      removedTier2: 250,
+      clean: 910
     },
-    cumulative: {
-      since: "2026-04-16",
-      totalRegisteredUsers: 2108,
-      totalUserViews: 10106
-    },
-    groupedChannelTrend: [
-      { label: "Prev Window", Organic: 0, PaidSocial: 0, Referral: 632, ContentSEO: 51, Other: 93 },
-      { label: "Current WTD", Organic: 0, PaidSocial: 0, Referral: 1164, ContentSEO: 17, Other: 66 }
+    daily: [
+      { date: "2026-04-16", newVisitors: 675, cleanSignups: 67, rawSignups: 67, convRate: 9.93, dau: 129 },
+      { date: "2026-04-17", newVisitors: 3621, cleanSignups: 400, rawSignups: 471, convRate: 11.05, dau: 625 },
+      { date: "2026-04-18", newVisitors: 1413, cleanSignups: 93, rawSignups: 95, convRate: 6.58, dau: 216 },
+      { date: "2026-04-19", newVisitors: 1016, cleanSignups: 143, rawSignups: 143, convRate: 14.07, dau: 254 },
+      { date: "2026-04-20", newVisitors: 2182, cleanSignups: 89, rawSignups: 751, convRate: 4.08, dau: 214 },
+      { date: "2026-04-21", newVisitors: 1762, cleanSignups: 93, rawSignups: 383, convRate: 5.28, dau: 189 },
+      { date: "2026-04-22", newVisitors: 1044, cleanSignups: 25, rawSignups: 134, convRate: 2.39, dau: 40 }
     ],
-    groupedChannelCurrentWeek: [
-      { channel: "Referral", value: 1164 },
-      { channel: "Content/SEO", value: 17 },
-      { channel: "Other", value: 66 },
-      { channel: "Organic", value: 0 },
-      { channel: "Paid Social", value: 0 }
-    ],
-    currentWeekRawChannels: [
-      { channel: "Referrals (organic)", signups: 1140, cvr: 88.5, group: "Referral" },
-      { channel: "google", signups: 52, cvr: 4.5, group: "Content/SEO" },
-      { channel: "Sahara AI", signups: 15, cvr: 17.05, group: "Other" },
-      { channel: "twitter", signups: 12, cvr: 12.24, group: "Other" },
-      { channel: "hs_email", signups: 2, cvr: 5.88, group: "Other" },
-      { channel: "Direct", signups: 17, cvr: 1.01, group: "Other" },
-      { channel: "Referrals (paid)", signups: 1, cvr: 14.29, group: "Other" },
-      { channel: "KOL Referrals", signups: 8, cvr: 100.0, group: "Referral" },
-      { channel: "beta.heysorin.ai", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "facebook", signups: 0, cvr: 0.0, group: "Paid Social" },
-      { channel: "Internal (heysorin)", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "discord", signups: 1, cvr: 14.29, group: "Other" },
-      { channel: "Other", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "telegram", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "x", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "tokenpocket", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "blog", signups: 1, cvr: 50.0, group: "Content/SEO" },
-      { channel: "youtube", signups: 0, cvr: 0.0, group: "Other" },
-      { channel: "ambassador", signups: 0, cvr: 0.0, group: "Other" }
+    dailyByChannel: [
+      { date: "2026-04-16", Referral: 15, ContentSEO: 1, Direct: 16, Social: 16, Other: 19 },
+      { date: "2026-04-17", Referral: 283, ContentSEO: 4, Direct: 54, Social: 29, Other: 30 },
+      { date: "2026-04-18", Referral: 17, ContentSEO: 29, Direct: 18, Social: 14, Other: 15 },
+      { date: "2026-04-19", Referral: 119, ContentSEO: 12, Direct: 5, Social: 1, Other: 6 },
+      { date: "2026-04-20", Referral: 46, ContentSEO: 17, Direct: 9, Social: 6, Other: 11 },
+      { date: "2026-04-21", Referral: 38, ContentSEO: 34, Direct: 9, Social: 6, Other: 6 },
+      { date: "2026-04-22", Referral: 4, ContentSEO: 4, Direct: 0, Social: 1, Other: 0 }
     ]
   },
   retention: {
     d1: 1.0,
     d7: 0.276,
     d30: 0.0,
-    previousD1: 1.0
+    previousD1: 1.0,
+    curr: 5.65,
+    nurr: 4.55,
+    currentUsers: 74,
+    newUsers: 177
   },
   engagement: {
     current: {
-      dau: 260,
-      wau: 825,
-      mau: 2536,
+      dau: 260, wau: 825, mau: 2536,
       usersSendingAtLeastOneMessage: 467,
       chatSessionsCreated: 1715,
       userMessagesSent: 1954
     },
     previousDay: {
-      dau: 620,
-      wau: 825,
-      mau: 2536,
+      dau: 620, wau: 825, mau: 2536,
       usersSendingAtLeastOneMessage: 238,
       chatSessionsCreated: 285,
       userMessagesSent: 657
