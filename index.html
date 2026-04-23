@@ -21,6 +21,8 @@
     .time-btn{padding:5px 14px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:12px;font-weight:600;color:#64748B;transition:all .15s}
     .time-btn:hover{color:var(--text)}
     .time-btn.active{background:#fff;color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,0.1)}
+    .period-label{font-size:11px;color:var(--text-muted);font-style:italic}
+    .time-def{font-size:10px;color:var(--text-muted);max-width:280px;line-height:1.3}
     .container{max-width:1400px;margin:0 auto;padding:24px 32px}
     .section{margin-bottom:28px}
     .section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -38,7 +40,6 @@
     .kpi-label{font-size:12px;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px}
     .kpi-value{font-size:28px;font-weight:800;color:var(--text)}
     .kpi-sub{font-size:12px;color:var(--text-muted);margin-top:6px}
-    .empty{color:#CBD5E1}
     .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px}
     .pill-green{background:#DCFCE7;color:#166534}
     .pill-red{background:#FEE2E2;color:#991B1B}
@@ -52,9 +53,10 @@
     .insight-title{font-size:11px;color:var(--primary);font-weight:700;text-transform:uppercase;margin-bottom:4px}
     .insight-text{font-size:12px;color:var(--text-secondary);line-height:1.5}
     .mini-table{width:100%;border-collapse:collapse;font-size:12px}
-    .mini-table th{padding:8px;text-align:left;color:var(--text-secondary);border-bottom:2px solid var(--border);text-transform:uppercase;font-size:11px}
-    .mini-table td{padding:10px 8px;border-bottom:1px solid var(--border)}
+    .mini-table th{padding:8px 6px;text-align:left;color:var(--text-secondary);border-bottom:2px solid var(--border);text-transform:uppercase;font-size:10px;white-space:nowrap}
+    .mini-table td{padding:8px 6px;border-bottom:1px solid var(--border);white-space:nowrap}
     .mini-table tr:last-child td{border-bottom:none}
+    .mini-table .num{text-align:right;font-variant-numeric:tabular-nums}
     .muted{color:var(--text-muted)}
     .note{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px}
     .bot-filter-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px;user-select:none}
@@ -66,6 +68,10 @@
     .bot-filter-stat{text-align:center;padding:8px;background:#F8FAFC;border-radius:6px}
     .bot-filter-stat .num{font-size:18px;font-weight:800;color:var(--text)}
     .bot-filter-stat .lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase}
+    .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .legend-inline{display:flex;gap:16px;font-size:11px;color:var(--text-secondary);margin-bottom:12px;flex-wrap:wrap}
+    .legend-inline span{display:flex;align-items:center;gap:4px}
+    .legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
     @media(max-width:1024px){.grid-4{grid-template-columns:repeat(2,1fr)} .grid-3,.grid-2{grid-template-columns:1fr}}
     @media(max-width:640px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr} .container{padding:16px}}
   </style>
@@ -75,6 +81,7 @@
   <h1>Sorin Product Dashboard</h1>
   <div class="header-meta">
     <span id="lastUpdated"></span>
+    <span class="time-def" id="timeDef"></span>
     <div class="time-range">
       <button class="time-btn" data-range="3d" onclick="onTimeRangeChange('3d')">3D</button>
       <button class="time-btn active" data-range="7d" onclick="onTimeRangeChange('7d')">7D</button>
@@ -92,7 +99,8 @@
     <div class="section-header">
       <div class="section-divider"></div>
       <h2>Upper Funnel</h2>
-      <span class="section-desc">— Bot-filtered clean metrics</span>
+      <span class="section-desc">\u2014 Bot-filtered clean metrics</span>
+      <span class="period-label" id="ufPeriod"></span>
     </div>
 
     <div class="bot-filter-toggle" onclick="toggleBotFilter()">
@@ -141,24 +149,77 @@
       </div>
     </div>
 
-    <div class="grid-2">
+    <div class="grid-2" style="margin-bottom:16px;">
       <div class="card">
         <div class="chart-title">Daily Signups: Raw vs Clean</div>
         <div class="chart-subtitle">Today's clean count is a floor (retroactive as users accumulate sessions)</div>
-        <div class="chart-container" style="height:260px">
+        <div class="chart-container" style="height:240px">
           <canvas id="dailySignupsChart"></canvas>
         </div>
       </div>
       <div class="card">
         <div class="chart-title">Signups by Channel (Daily)</div>
         <div class="chart-subtitle">Stacked by grouped channel</div>
-        <div class="chart-container" style="height:260px">
+        <div class="chart-container" style="height:240px">
           <canvas id="channelChart"></canvas>
         </div>
         <div class="insight">
           <div class="insight-title">Insight</div>
           <div class="insight-text" id="channelInsight"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Channel Performance Table -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="chart-title">Channel Performance (User Behavior after Signup)</div>
+      <div class="chart-subtitle">From PostHog \u2014 aggregated by channel for selected period. Shows how users from each channel engage after signing up.</div>
+      <div class="table-scroll">
+        <table class="mini-table" id="channelBehaviorTable">
+          <thead>
+            <tr>
+              <th>Channel</th><th class="num">Visitors</th><th class="num">Signups</th><th class="num">CVR</th>
+              <th class="num">Msgs</th><th class="num">Swaps</th><th class="num">Stakes</th>
+              <th class="num">Market</th><th class="num">DNA</th><th class="num">Portfolio</th><th class="num">Monitors</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PostHog Tables -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="chart-title">Daily New Users (Clean, Bot-filtered)</div>
+      <div class="chart-subtitle">From PostHog \u2014 new visitors, signups, and feature activation by day</div>
+      <div class="table-scroll">
+        <table class="mini-table" id="dailyNewUsersTable">
+          <thead>
+            <tr>
+              <th>Date</th><th class="num">Visitors</th><th class="num">Signups</th><th class="num">CVR</th>
+              <th class="num">Msgs</th><th class="num">Swaps</th><th class="num">Stakes</th>
+              <th class="num">Market</th><th class="num">DNA</th><th class="num">Portfolio</th><th class="num">Monitors</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chart-title">Daily Active Users (Clean, Bot-filtered)</div>
+      <div class="chart-subtitle">From PostHog \u2014 DAU and feature usage by day</div>
+      <div class="table-scroll">
+        <table class="mini-table" id="dailyActiveUsersTable">
+          <thead>
+            <tr>
+              <th>Date</th><th class="num">DAU</th>
+              <th class="num">Msgs</th><th class="num">Swaps</th><th class="num">Stakes</th>
+              <th class="num">Market</th><th class="num">DNA</th><th class="num">Portfolio</th><th class="num">Monitors</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -168,27 +229,68 @@
     <div class="section-header">
       <div class="section-divider"></div>
       <h2>Retention</h2>
-      <span class="section-desc">— Are users coming back?</span>
+      <span class="section-desc">\u2014 Are users coming back?</span>
+      <span class="period-label" id="retPeriod"></span>
     </div>
-    <div class="grid-4" style="margin-bottom:16px;">
+
+    <div class="chart-title" style="margin-bottom:8px">Window Retention (by weekly cohort)</div>
+    <div class="chart-subtitle" style="margin-bottom:12px">% of cohort active at least once within each window. 7日 = Day 1~7, 14日 = Day 8~14, 30日 = Day 24~30</div>
+    <div class="grid-3" style="margin-bottom:20px;">
       <div class="card kpi">
-        <div class="kpi-flag green"></div>
-        <div class="kpi-label">D1 Retention</div>
-        <div class="kpi-value" id="retentionD1"></div>
-        <div class="kpi-sub">Classic retention</div>
-        <div class="pill pill-green" id="retentionD1Delta"></div>
+        <div class="kpi-flag yellow"></div>
+        <div class="kpi-label">D7 Window</div>
+        <div class="kpi-value" id="retentionD7"></div>
+        <div class="kpi-sub">Day 1~7 内至少活跃一次</div>
       </div>
       <div class="card kpi">
         <div class="kpi-flag yellow"></div>
-        <div class="kpi-label">D7 Retention</div>
-        <div class="kpi-value" id="retentionD7"></div>
-        <div class="kpi-sub">Classic retention</div>
+        <div class="kpi-label">D14 Window</div>
+        <div class="kpi-value" id="retentionD14"></div>
+        <div class="kpi-sub">Day 8~14 内至少活跃一次</div>
       </div>
       <div class="card kpi">
         <div class="kpi-flag red"></div>
-        <div class="kpi-label">D30 Retention</div>
+        <div class="kpi-label">D30 Window</div>
         <div class="kpi-value" id="retentionD30"></div>
-        <div class="kpi-sub">Classic retention</div>
+        <div class="kpi-sub">Day 24~30 内至少活跃一次</div>
+      </div>
+    </div>
+
+    <div class="chart-title" style="margin-bottom:8px">Classic Retention D_k (by weekly cohort)</div>
+    <div class="chart-subtitle" style="margin-bottom:12px">% of cohort active on exactly Day N. Benchmark: D1 35-45%, D7 20-30%, D30 12-18%, D90 8-12%</div>
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Classic D1</div>
+        <div class="kpi-value" id="classicD1"></div>
+        <div class="kpi-sub">Active on exactly Day 1</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag yellow"></div>
+        <div class="kpi-label">Classic D7</div>
+        <div class="kpi-value" id="classicD7"></div>
+        <div class="kpi-sub">Active on exactly Day 7</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag yellow"></div>
+        <div class="kpi-label">Classic D30</div>
+        <div class="kpi-value" id="classicD30"></div>
+        <div class="kpi-sub">Active on exactly Day 30</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-flag red"></div>
+        <div class="kpi-label">Classic D90</div>
+        <div class="kpi-value" id="classicD90"></div>
+        <div class="kpi-sub">Active on exactly Day 90</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card kpi">
+        <div class="kpi-flag green"></div>
+        <div class="kpi-label">Stickiness</div>
+        <div class="kpi-value" id="stickiness"></div>
+        <div class="kpi-sub">DAU / Trailing 28-day MAU. Social apps: 25-50%, Fintech: 15-25%. &lt;12% = no habit formed.</div>
       </div>
       <div class="card kpi">
         <div class="kpi-flag green"></div>
@@ -197,6 +299,7 @@
         <div class="kpi-sub">CURR / NURR</div>
       </div>
     </div>
+
     <div class="card">
       <table class="mini-table">
         <thead>
@@ -217,7 +320,8 @@
     <div class="section-header">
       <div class="section-divider"></div>
       <h2>Engagement</h2>
-      <span class="section-desc">— How deeply are users using the product?</span>
+      <span class="section-desc">\u2014 How deeply are users using the product?</span>
+      <span class="period-label" id="engPeriod"></span>
     </div>
     <div class="grid-4" style="margin-bottom:16px;">
       <div class="card kpi">
@@ -251,9 +355,13 @@
     </div>
     <div class="grid-3">
       <div class="card">
-        <div class="chart-title">DAU / WAU / MAU</div>
-        <div class="chart-subtitle">Available active-user scales (New vs Returning DAU)</div>
-        <div class="chart-container" style="height:220px">
+        <div class="chart-title">DAU Trend (New vs Returning)</div>
+        <div class="chart-subtitle">How daily active users split between first-time and returning visitors</div>
+        <div class="legend-inline">
+          <span><span class="legend-dot" style="background:#3559a1"></span> <strong>Returning DAU</strong> = users who visited on a prior day and came back today</span>
+          <span><span class="legend-dot" style="background:#1fb980"></span> <strong>New DAU</strong> = users on their first day of engagement ever (DNU)</span>
+        </div>
+        <div class="chart-container" style="height:200px">
           <canvas id="dauTrendChart"></canvas>
         </div>
       </div>
@@ -299,7 +407,8 @@
     <div class="section-header">
       <div class="section-divider"></div>
       <h2>Monetization</h2>
-      <span class="section-desc">— Is engagement converting to revenue?</span>
+      <span class="section-desc">\u2014 Is engagement converting to revenue?</span>
+      <span class="period-label" id="monPeriod"></span>
     </div>
     <div class="grid-4" style="margin-bottom:16px;">
       <div class="card kpi">
