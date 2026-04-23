@@ -143,6 +143,16 @@ window.dashboardData = {
       { date: "2026-04-22", signups: 103, day0: 86.4, day1: 2.9, day2: 0, day3: 0, day7: 0, day14: 0, day30: 0 },
       { date: "2026-04-23", signups: 63, day0: 81.0, day1: 0, day2: 0, day3: 0, day7: 0, day14: 0, day30: 0 }
     ],
+    bounded: [
+      { date: "2026-04-16", signups: 67, boundedD7: 22.4, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-17", signups: 400, boundedD7: 14.0, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-18", signups: 93, boundedD7: 19.4, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-19", signups: 143, boundedD7: 4.2, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-20", signups: 94, boundedD7: 5.3, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-21", signups: 99, boundedD7: 6.1, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-22", signups: 103, boundedD7: 2.9, boundedD14: 0, boundedD30: 0 },
+      { date: "2026-04-23", signups: 63, boundedD7: 0, boundedD14: 0, boundedD30: 0 }
+    ],
     stickiness: [
       { date: "2026-04-16", dau: 121, wau: 121, stickiness: 100.0 },
       { date: "2026-04-17", dau: 625, wau: 717, stickiness: 87.2 },
