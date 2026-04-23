@@ -405,9 +405,9 @@ function buildRetention() {
   }
 
   setText("boundedD14", fmtPctV(latestBounded.boundedD14, 1));
-  setText("boundedD14Sub", "Day 8–14 内至少活跃一次");
+  setText("boundedD14Sub", "Active at least once during Day 8–14");
   setText("boundedD30", fmtPctV(latestBounded.boundedD30, 1));
-  setText("boundedD30Sub", "Day 24–30 内至少活跃一次");
+  setText("boundedD30Sub", "Active at least once during Day 24–30");
 
   // Bounded cohort table
   const boundedBody = document.querySelector("#boundedCohortTable tbody");
