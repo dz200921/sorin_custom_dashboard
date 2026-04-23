@@ -312,70 +312,133 @@
       <div class="section-header">
         <div class="section-divider"></div>
         <h2>Retention</h2>
-        <span class="section-desc">— same-day habit is strong, next-day return still needs work</span>
+        <span class="section-desc">— are users coming back?</span>
         <span class="period-label" id="retPeriod"></span>
       </div>
 
-      <div class="grid-5" style="margin-bottom:16px;">
-        <div class="card kpi mini-kpi">
-          <div class="kpi-label">Latest Day 0</div>
-          <div class="kpi-value" id="retDay0"></div>
-          <div class="kpi-sub" id="retDay0Sub"></div>
+      <!-- Classic Retention -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="chart-title">Classic Retention D_k</div>
+        <div class="chart-subtitle"><strong>Definition:</strong> % of cohort active on exactly Day N. Active on Day N / Cohort Size, by weekly cohort. <strong>Granularity:</strong> Weekly. <strong>Warning:</strong> D1 &lt; 25% means value not clear; D30 &lt; 8% means no habit formed.</div>
+        <div class="grid-5" style="margin-bottom:12px;">
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag green"></div>
+            <div class="kpi-label">Classic D0</div>
+            <div class="kpi-value" id="classicD0"></div>
+            <div class="kpi-sub" id="classicD0Sub"></div>
+          </div>
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag yellow"></div>
+            <div class="kpi-label">Classic D1</div>
+            <div class="kpi-value" id="classicD1"></div>
+            <div class="kpi-sub">Active on exactly Day 1<br>Benchmark: 35–45%</div>
+            <div class="pill pill-neutral" id="classicD1Status"></div>
+          </div>
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag yellow"></div>
+            <div class="kpi-label">Classic D7</div>
+            <div class="kpi-value" id="classicD7"></div>
+            <div class="kpi-sub">Active on exactly Day 7<br>Benchmark: 20–30%</div>
+          </div>
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag red"></div>
+            <div class="kpi-label">Classic D30</div>
+            <div class="kpi-value" id="classicD30"></div>
+            <div class="kpi-sub">Active on exactly Day 30<br>Benchmark: 12–18%</div>
+          </div>
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag grey"></div>
+            <div class="kpi-label">Classic D90</div>
+            <div class="kpi-value" id="classicD90"></div>
+            <div class="kpi-sub">Active on exactly Day 90<br>Benchmark: 8–12%</div>
+          </div>
         </div>
-        <div class="card kpi mini-kpi">
-          <div class="kpi-label">Latest Day 1</div>
-          <div class="kpi-value" id="retDay1"></div>
-          <div class="kpi-sub" id="retDay1Sub"></div>
-        </div>
-        <div class="card kpi mini-kpi">
-          <div class="kpi-label">Latest Eligible Day 7</div>
-          <div class="kpi-value" id="retDay7"></div>
-          <div class="kpi-sub" id="retDay7Sub"></div>
-        </div>
-        <div class="card kpi mini-kpi">
-          <div class="kpi-label">Latest Stickiness</div>
-          <div class="kpi-value" id="retStickiness"></div>
-          <div class="kpi-sub" id="retStickinessSub"></div>
-        </div>
-        <div class="card kpi mini-kpi">
-          <div class="kpi-label">Latest WAU</div>
-          <div class="kpi-value" id="retWau"></div>
-          <div class="kpi-sub" id="retWauSub"></div>
+        <div class="table-scroll">
+          <table class="mini-table" id="classicCohortTable">
+            <thead>
+              <tr>
+                <th>Cohort Date</th>
+                <th class="num">Signups</th>
+                <th class="num">D0</th>
+                <th class="num">D1</th>
+                <th class="num">D2</th>
+                <th class="num">D3</th>
+                <th class="num">D7</th>
+                <th class="num">D14</th>
+                <th class="num">D30</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
 
+      <!-- Bounded Retention -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="chart-title">Bounded Retention (Window)</div>
+        <div class="chart-subtitle"><strong>Definition:</strong> % of cohort active at least once within a bounded window. D7 = Day 1–7, D14 = Day 8–14, D30 = Day 24–30. By weekly cohort. <strong>Note:</strong> Bounded ≥ Classic because it catches any activity in the window, not just on a specific day.</div>
+        <div class="grid-3" style="margin-bottom:12px;">
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag green"></div>
+            <div class="kpi-label">Bounded D7</div>
+            <div class="kpi-value" id="boundedD7"></div>
+            <div class="kpi-sub" id="boundedD7Sub"></div>
+            <div class="pill pill-neutral" id="boundedD7Status"></div>
+          </div>
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag yellow"></div>
+            <div class="kpi-label">Bounded D14</div>
+            <div class="kpi-value" id="boundedD14"></div>
+            <div class="kpi-sub" id="boundedD14Sub"></div>
+          </div>
+          <div class="card kpi mini-kpi">
+            <div class="kpi-flag red"></div>
+            <div class="kpi-label">Bounded D30</div>
+            <div class="kpi-value" id="boundedD30"></div>
+            <div class="kpi-sub" id="boundedD30Sub"></div>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="mini-table" id="boundedCohortTable">
+            <thead>
+              <tr>
+                <th>Cohort Date</th>
+                <th class="num">Signups</th>
+                <th class="num">Bounded D7 (Day 1–7)</th>
+                <th class="num">Bounded D14 (Day 8–14)</th>
+                <th class="num">Bounded D30 (Day 24–30)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Stickiness -->
       <div class="grid-2">
         <div class="card">
-          <div class="chart-title">DAU / WAU Stickiness Trend</div>
-          <div class="chart-subtitle">Bars show DAU, line shows DAU / WAU. This helps separate scale from habit.</div>
-          <div class="chart-container" style="height:280px">
+          <div class="chart-title">Stickiness (DAU / WAU)</div>
+          <div class="chart-subtitle">Bars show DAU, line shows DAU / WAU. Social apps: 25–50%, Fintech: 15–25%. &lt;12% = no habit formed.</div>
+          <div class="chart-container" style="height:260px">
             <canvas id="stickinessChart"></canvas>
-          </div>
-          <div class="insight">
-            <div class="insight-title">Retention read</div>
-            <div class="insight-text" id="retentionInsight"></div>
           </div>
         </div>
         <div class="card">
-          <div class="chart-title">Day-N Retention Cohorts</div>
-          <div class="chart-subtitle">Recent bot-filtered cohorts. Freshest rows tell us about Day 0 and Day 1 quality first.</div>
-          <div class="table-scroll">
-            <table class="mini-table" id="cohortTable">
-              <thead>
-                <tr>
-                  <th>Cohort Day</th>
-                  <th class="num">Signups</th>
-                  <th class="num">Day 0</th>
-                  <th class="num">Day 1</th>
-                  <th class="num">Day 2</th>
-                  <th class="num">Day 3</th>
-                  <th class="num">Day 7</th>
-                  <th class="num">Day 14</th>
-                  <th class="num">Day 30</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+          <div class="chart-title">Retention Summary</div>
+          <div class="chart-subtitle">Key retention health indicators from the latest available data.</div>
+          <table class="mini-table">
+            <thead>
+              <tr><th>Metric</th><th>Definition</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Stickiness</td><td>DAU / Trailing 7D WAU</td><td id="retStickiness"></td></tr>
+              <tr><td>WAU</td><td>Trailing 7D unique active users</td><td id="retWau"></td></tr>
+              <tr><td>Classic D1 (latest)</td><td>Latest non-zero Day 1 classic retention</td><td id="retClassicD1Note"></td></tr>
+            </tbody>
+          </table>
+          <div class="insight" style="margin-top:12px">
+            <div class="insight-title">Retention read</div>
+            <div class="insight-text" id="retentionInsight"></div>
           </div>
         </div>
       </div>
