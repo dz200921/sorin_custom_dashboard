@@ -236,11 +236,17 @@ function buildUpperFunnel() {
     }
   });
 
+  const normalizeChannel = (ch) => {
+    const lower = ch.toLowerCase();
+    if (lower === "x") return "twitter";
+    return ch;
+  };
   const channelAgg = {};
   channelDetails.forEach(row => {
-    if (!channelAgg[row.channel]) {
-      channelAgg[row.channel] = {
-        channel: row.channel,
+    const key = normalizeChannel(row.channel);
+    if (!channelAgg[key]) {
+      channelAgg[key] = {
+        channel: key,
         newVisitors: 0,
         signups: 0,
         msgs: 0,
@@ -253,16 +259,16 @@ function buildUpperFunnel() {
         monitors: 0
       };
     }
-    channelAgg[row.channel].newVisitors += row.newVisitors;
-    channelAgg[row.channel].signups += row.signups;
-    channelAgg[row.channel].msgs += row.msgs;
-    channelAgg[row.channel].transfers += row.transfers;
-    channelAgg[row.channel].swaps += row.swaps;
-    channelAgg[row.channel].stakes += row.stakes;
-    channelAgg[row.channel].market += row.market;
-    channelAgg[row.channel].dna += row.dna;
-    channelAgg[row.channel].portfolio += row.portfolio;
-    channelAgg[row.channel].monitors += row.monitors;
+    channelAgg[key].newVisitors += row.newVisitors;
+    channelAgg[key].signups += row.signups;
+    channelAgg[key].msgs += row.msgs;
+    channelAgg[key].transfers += row.transfers;
+    channelAgg[key].swaps += row.swaps;
+    channelAgg[key].stakes += row.stakes;
+    channelAgg[key].market += row.market;
+    channelAgg[key].dna += row.dna;
+    channelAgg[key].portfolio += row.portfolio;
+    channelAgg[key].monitors += row.monitors;
   });
   const topChannel = Object.values(channelAgg).sort((a, b) => b.signups - a.signups)[0];
   if (topChannel) {
