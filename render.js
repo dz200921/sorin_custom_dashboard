@@ -341,6 +341,7 @@ function buildUpperFunnel() {
 
 function buildRetention() {
   const cohorts = filterDaily(data.retention.cohorts, currentRange);
+  const bounded = filterDaily(data.retention.bounded, currentRange);
   const stickiness = filterDaily(data.retention.stickiness, currentRange);
   const latestCohort = last(data.retention.cohorts);
   const latestDay1 = latestWithValue(data.retention.cohorts, "day1", value => value > 0);
@@ -348,21 +349,73 @@ function buildRetention() {
   const latestStickiness = last(data.retention.stickiness);
 
   setText("retPeriod", periodLabel(cohorts));
-  setText("retDay0", fmtPctV(latestCohort.day0, 1));
-  setText("retDay0Sub", `${latestCohort.date} cohort · ${fmt(latestCohort.signups)} signups`);
 
-  setText("retDay1", fmtPctV(latestDay1.day1, 1));
-  setText("retDay1Sub", `${latestDay1.date} latest non-zero Day 1`);
+  // ── Classic Retention KPIs ──
+  setText("classicD0", fmtPctV(latestCohort.day0, 1));
+  setText("classicD0Sub", `${latestCohort.date} cohort · ${fmt(latestCohort.signups)} signups`);
 
-  setText("retDay7", fmtPctV(latestDay7.day7, 1));
-  setText("retDay7Sub", `${latestDay7.date} latest eligible Day 7`);
+  const d1Value = latestDay1 ? latestDay1.day1 : 0;
+  setText("classicD1", fmtPctV(d1Value, 1));
+  const d1El = document.getElementById("classicD1Status");
+  if (d1El) {
+    if (d1Value >= 35) d1El.className = "pill pill-green", d1El.textContent = "▲ Healthy";
+    else if (d1Value >= 25) d1El.className = "pill pill-neutral", d1El.textContent = "─ Below benchmark";
+    else d1El.className = "pill pill-red", d1El.textContent = "▼ Value not clear";
+  }
 
-  setText("retStickiness", fmtPctV(latestStickiness.stickiness, 1));
-  setText("retStickinessSub", `${latestStickiness.date} DAU / WAU`);
+  setText("classicD7", fmtPctV(latestDay7 ? latestDay7.day7 : 0, 1));
+  setText("classicD30", fmtPctV(latestCohort.day30, 1));
+  setText("classicD90", "—");
+  // D90 not available yet (product < 90 days old)
 
-  setText("retWau", fmt(latestStickiness.wau));
-  setText("retWauSub", "Trailing 7D WAU");
+  // Classic cohort table
+  const classicBody = document.querySelector("#classicCohortTable tbody");
+  classicBody.innerHTML = cohorts.map(row => `
+    <tr>
+      <td>${row.date}</td>
+      <td class="num">${fmt(row.signups)}</td>
+      <td class="num">${fmtPctV(row.day0, 1)}</td>
+      <td class="num">${fmtPctV(row.day1, 1)}</td>
+      <td class="num">${fmtPctV(row.day2, 1)}</td>
+      <td class="num">${fmtPctV(row.day3, 1)}</td>
+      <td class="num">${fmtPctV(row.day7, 1)}</td>
+      <td class="num">${fmtPctV(row.day14, 1)}</td>
+      <td class="num">${fmtPctV(row.day30, 1)}</td>
+    </tr>
+  `).join("");
 
+  // ── Bounded Retention KPIs ──
+  const latestBounded = last(data.retention.bounded);
+  const latestBoundedD7 = latestWithValue(data.retention.bounded, "boundedD7", value => value > 0);
+
+  setText("boundedD7", fmtPctV(latestBoundedD7 ? latestBoundedD7.boundedD7 : 0, 1));
+  setText("boundedD7Sub", latestBoundedD7 ? `${latestBoundedD7.date} latest non-zero` : "No non-zero D7 yet");
+  const bD7El = document.getElementById("boundedD7Status");
+  if (bD7El && latestBoundedD7) {
+    const v = latestBoundedD7.boundedD7;
+    if (v >= 30) bD7El.className = "pill pill-green", bD7El.textContent = "▲ Healthy";
+    else if (v >= 15) bD7El.className = "pill pill-neutral", bD7El.textContent = "─ Below benchmark";
+    else bD7El.className = "pill pill-red", bD7El.textContent = "▼ Weak";
+  }
+
+  setText("boundedD14", fmtPctV(latestBounded.boundedD14, 1));
+  setText("boundedD14Sub", "Day 8–14 内至少活跃一次");
+  setText("boundedD30", fmtPctV(latestBounded.boundedD30, 1));
+  setText("boundedD30Sub", "Day 24–30 内至少活跃一次");
+
+  // Bounded cohort table
+  const boundedBody = document.querySelector("#boundedCohortTable tbody");
+  boundedBody.innerHTML = bounded.map(row => `
+    <tr>
+      <td>${row.date}</td>
+      <td class="num">${fmt(row.signups)}</td>
+      <td class="num">${fmtPctV(row.boundedD7, 1)}</td>
+      <td class="num">${fmtPctV(row.boundedD14, 1)}</td>
+      <td class="num">${fmtPctV(row.boundedD30, 1)}</td>
+    </tr>
+  `).join("");
+
+  // ── Stickiness chart ──
   makeChart("stickinessChart", {
     type: "bar",
     data: {
@@ -403,28 +456,18 @@ function buildRetention() {
           position: "right",
           grid: { drawOnChartArea: false },
           ticks: { callback: value => `${value}%` },
-          title: { display: true, text: "Stickiness" }
+          title: { display: true, text: "Stickiness %" }
         }
       }
     }
   });
 
-  const cohortBody = document.querySelector("#cohortTable tbody");
-  cohortBody.innerHTML = cohorts.map(row => `
-    <tr>
-      <td>${row.date}</td>
-      <td class="num">${fmt(row.signups)}</td>
-      <td class="num">${fmtPctV(row.day0, 1)}</td>
-      <td class="num">${fmtPctV(row.day1, 1)}</td>
-      <td class="num">${fmtPctV(row.day2, 1)}</td>
-      <td class="num">${fmtPctV(row.day3, 1)}</td>
-      <td class="num">${fmtPctV(row.day7, 1)}</td>
-      <td class="num">${fmtPctV(row.day14, 1)}</td>
-      <td class="num">${fmtPctV(row.day30, 1)}</td>
-    </tr>
-  `).join("");
+  // Summary table
+  setText("retStickiness", fmtPctV(latestStickiness.stickiness, 1));
+  setText("retWau", fmt(latestStickiness.wau));
+  setText("retClassicD1Note", latestDay1 ? `${fmtPctV(latestDay1.day1, 1)} (${latestDay1.date} cohort)` : "—");
 
-  setText("retentionInsight", `${latestStickiness.date} stickiness is ${fmtPctV(latestStickiness.stickiness, 1)}, while the freshest cohort shows ${fmtPctV(latestCohort.day0, 1)} Day 0 retention. The recent story is strong same-day usage but thin next-day return.`);
+  setText("retentionInsight", `Same-day usage is strong (D0: ${fmtPctV(latestCohort.day0, 1)}), but next-day return is weak (Classic D1: ${fmtPctV(d1Value, 1)}). Stickiness has dropped from 87% to ${fmtPctV(latestStickiness.stickiness, 1)}. The product needs a hook that pulls users back on Day 1.`);
 }
 
 /* ── Engagement ── */
